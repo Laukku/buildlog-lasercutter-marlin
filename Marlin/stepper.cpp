@@ -377,10 +377,9 @@ ISR(TIMER1_COMPA_vect)
     out_bits = current_block->direction_bits;
 
 	// Continuous firing of the laser during a move happens here, PPM and raster happen further down
+	// Moved that down too, for intensity modulation
 	#ifdef LASER
-	if (current_block->laser_mode == CONTINUOUS && current_block->laser_status == LASER_ON) {
-	  laser_fire(current_block->laser_intensity);
-    }
+	
     if (current_block->laser_status == LASER_OFF) {
       if (laser.diagnostics) SERIAL_ECHOLN("Laser status set to off, in interrupt handler");
       laser_extinguish();
@@ -676,7 +675,22 @@ ISR(TIMER1_COMPA_vect)
 		      }
 		      counter_raster++;
 			}
+			
 			#endif // LASER_RASTER
+			if(current_block->laser_mode == CONTINUOUS && current_block->laser_status == LASER_ON) { 
+			// Modulate laser intensity based on current speed
+				// laser_fire(current_block->laser_intensity * (step_rate / current_block->nominal_rate));
+				// 1. Test as is (with laser modulation removed from planner.cpp)
+				// -With the modulation code below in acceleration logic, produces gaps at corners - 
+				// 1.1 Testing with initial_rate, should fire in corners at minimum possible intensity:
+				// laser_fire(current_block->laser_intensity * (current_block->initial_rate / current_block->nominal_rate));
+				// - The result is precisely the same as without this
+				// 2. just test that the laser can be fired here, remove fire commands from acceleration logic:
+				// laser_fire(current_block->laser_intensity);
+				// 2.1 Trying with full intensity in acceleration logic
+				// -Laser cannot be fired here?
+				// 3. Try modulation here
+			}
 		  counter_l -= current_block->step_event_count;
 		  }
 		  if (current_block->laser_duration != 0 && (laser.last_firing + current_block->laser_duration < micros())) {
@@ -704,6 +718,14 @@ ISR(TIMER1_COMPA_vect)
       timer = calc_timer(acc_step_rate);
       OCR1A = timer;
       acceleration_time += timer;
+	  #ifdef LASER
+	  if(current_block->laser_mode == CONTINUOUS && current_block->laser_status == LASER_ON) { 
+		// Modulate laser intensity based on current speed
+		  	  // laser_fire(current_block->laser_intensity * (acc_step_rate / current_block->nominal_rate));
+			  laser_fire(current_block->laser_intensity);
+			}
+	  #endif 
+	  
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
           advance += advance_rate;
@@ -733,6 +755,14 @@ ISR(TIMER1_COMPA_vect)
       timer = calc_timer(step_rate);
       OCR1A = timer;
       deceleration_time += timer;
+	 #ifdef LASER
+	  if(current_block->laser_mode == CONTINUOUS && current_block->laser_status == LASER_ON) { 
+		// Modulate laser intensity based on current speed
+		    // laser_fire(current_block->laser_intensity * (step_rate / current_block->nominal_rate));
+			laser_fire(current_block->laser_intensity);
+
+			}
+	  #endif 
       #ifdef ADVANCE
         for(int8_t i=0; i < step_loops; i++) {
           advance -= advance_rate;
@@ -745,14 +775,27 @@ ISR(TIMER1_COMPA_vect)
     }
     else { // Stay the same (nominal) speed!
       OCR1A = OCR1A_nominal;
+	  #ifdef LASER
+	  if(current_block->laser_mode == CONTINUOUS && current_block->laser_status == LASER_ON) { 
+		// Fire laser at full specified power when cruising
+		  	  laser_fire(current_block->laser_intensity);
+			}
+	  #endif
       // ensure we're running at the correct step rate, even if we just came off an acceleration
       step_loops = step_loops_nominal;
     }
-
+	
     // If current block is finished, reset pointer
     if (step_events_completed >= current_block->step_event_count) {
       current_block = NULL;
       plan_discard_current_block();
+	  #ifdef LASER
+		// Also turn off laser just to be sure!
+		if (current_block->laser_status == LASER_OFF) {
+		  if (laser.diagnostics) SERIAL_ECHOLN("Laser status set to off, in interrupt handler");
+		  laser_extinguish();
+		}
+		#endif // LASER
     }
   }
 }

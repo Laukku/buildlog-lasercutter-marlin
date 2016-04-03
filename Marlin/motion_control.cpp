@@ -23,6 +23,70 @@
 #include "stepper.h"
 #include "planner.h"
 
+// mc_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
+void mc_line(float curx, float cury,float x, float y, float z, float e, float feed_rate, uint8_t extruder)
+{
+	// Break accel and decel phases into 0.2 - 0.5 mm segments, let planner handle acceleration and intensity calculations
+	// _ _ _ _ _ _ _ _ _______________________________ _ _ _ _ _ _ _ <-- block lengths
+	/* const float MOVELENGTH = 0.2;
+	uint16_t i;
+	// How long is the original gcode move?
+	float command_length;
+	command_length = sqrt(pow(curx+x, 2) + pow(cury+y, 2)) ;
+	// How long (in mm) does acceleration take?
+	// feed_rate mm/sec, acceleration mm/sec^2 
+	float accel_max_time ;
+	accel_max_time = feed_rate / max_acceleration_units_per_sq_second[0]; // in ConfigurationStore.cpp, defined where?
+	// feed / accel  =  sec, time to accelerate
+	float accel_dist;
+	accel_dist = ((0.5*feed_rate) * accel_max_time);
+	// 1/2 *(feed_rate-0)  =  avg velocity during acceleration (assuming start from 0 mm/sec, usually we'll be in motion already though, but this way every case gets covered.)
+	// avg velocity * time to accel  =  distance traveled during acceleration
+	int accelmoves, totalmoves; // number of tiny moves that make up the accel phase, ...that would make up the whole move if they were all equally long
+	accelmoves = floor(accel_dist / MOVELENGTH);
+	totalmoves = floor(command_length / MOVELENGTH);
+	// How to break accel blocks into suitable lengths?
+	// get x,y vector that moves 0.2 mm 
+	float xvector, yvector;
+	xvector = (x-curx) / totalmoves;
+	yvector = (y-cury) / totalmoves;
+	
+	// Can accel distance fit twice in the whole gcode command's length?
+	if (command_length > accel_dist*2){ // More than 2 maximum accelerations fit in this G1 command
+		// Break in accel blocks, main block, and decel blocks
+		for (i = 1; i<=accelmoves; i++){ // Advance 0.2mm along the G1 move's path per block
+			curx = curx+xvector;
+			cury = cury+yvector;
+			plan_buffer_line(curx, cury, z, e, feed_rate, extruder);
+		}
+		// main block
+		curx = x - (accelmoves * xvector);
+		cury = y - (accelmoves * yvector);
+		plan_buffer_line(curx, cury, z, e, feed_rate, extruder);
+		for (i = 1; i<=accelmoves; i++){ // Advance 0.2mm along the G1 move's path per block
+			curx = curx+xvector;
+			cury = cury+yvector;
+			plan_buffer_line(curx, cury, z, e, feed_rate, extruder);
+		}
+	} else { // Can't fit two accelerations in the move
+		// Can only fit short blocks.
+		for (i = 1; i<=accelmoves; i++){ // Advance 0.2mm along the G1 move's path per block
+			curx = curx+xvector;
+			cury = cury+yvector;
+			plan_buffer_line(curx, cury, z, e, feed_rate, extruder);
+		}
+	}
+	// check that we have reached the destination, else make a tiny move to do so
+	
+	
+	
+  
+	// For each block, calculate end position x,y,z
+ */
+	plan_buffer_line(x, y, z, e, feed_rate, extruder);
+}
+
+
 // The arc is approximated by generating a huge number of tiny, linear segments. The length of each 
 // segment is configured in settings.mm_per_arc_segment.  
 void mc_arc(float *position, float *target, float *offset, uint8_t axis_0, uint8_t axis_1, 

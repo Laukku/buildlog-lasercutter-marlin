@@ -679,11 +679,15 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
   }
 
   #ifdef LASER
-    block->laser_intensity = laser.intensity;
+    
+
+	block->laser_intensity = laser.intensity;
+	
+	
     block->laser_duration = laser.duration;
     block->laser_status = laser.status;
     block->laser_mode = laser.mode;
-    
+    // block->everyother = true;
     // When operating in PULSED or RASTER modes, laser pulsing must operate in sync with movement.
     // Calculate steps between laser firings (steps_l) and consider that when determining largest
     // interval between steps for X, Y, Z, E, L to feed to the motion control code.
@@ -698,11 +702,11 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
 			int OldRange, NewRange;
 			float NewValue;
 			OldRange = (255 - 0);
-			NewRange = (laser.rasterlaserpower - 7); //7% power on my unit outputs hardly any noticable burn at F3000 on paper, so adjust the raster contrast based off 7 being the lower. 7 still produces burns at slower feed rates, but getting less power than this isn't typically needed at slow feed rates.
-			NewValue = (float)(((((float)laser.raster_data[i] - 0) * NewRange) / OldRange) + 7);
+			NewRange = (laser.rasterlaserpower - 5); //7% power on my unit outputs hardly any noticable burn at F3000 on paper, so adjust the raster contrast based off 7 being the lower. 7 still produces burns at slower feed rates, but getting less power than this isn't typically needed at slow feed rates.
+			NewValue = (float)(((((float)laser.raster_data[i] - 0) * NewRange) / OldRange) + 5);
 			
 			//If less than 7%, turn off the laser tube.
-			if(NewValue == 7) 
+			if(NewValue == 2) 
 				NewValue = 0;
 			
             block->laser_raster_data[i] = NewValue; 
@@ -753,6 +757,9 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
   block->nominal_speed = block->millimeters * inverse_second; // (mm/sec) Always > 0
   block->nominal_rate = ceil(block->step_event_count * inverse_second); // (step/sec) Always > 0
 
+	
+	
+	
   // Calculate and limit speed in mm/sec for each axis
   float current_speed[4];
   float speed_factor = 1.0; //factor <=1 do decrease speed
@@ -963,6 +970,8 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
   planner_recalculate();
 
   st_wake_up();
+  
+
 }
 
 void plan_set_position(const float &x, const float &y, const float &z, const float &e)

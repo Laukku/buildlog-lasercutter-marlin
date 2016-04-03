@@ -80,6 +80,9 @@ typedef struct {
     #endif // LASER_RASTER
   #endif // LASER
   volatile char busy;
+  // bool everyother; // For checking block lengths
+  // float feedrate; // For laser intensity calculation
+  // float new_intensity; // To be used near corners
 } block_t;
 
 // Initialize the motion plan subsystem

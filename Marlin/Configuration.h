@@ -83,6 +83,9 @@
 // 2 = Two pin control - A firing pin for which LOW = off, HIGH = on, and a seperate intensity pin which carries a constant PWM signal and adjusts duty cycle to control intensity
 #define LASER_CONTROL 2
 
+// Uncomment the following if your laser firing pin (not the PWM pin) for two pin control requires a HIGH signal to fire rather than a low (eg Red Sail M300 RS 3040)
+/// #define HIGH_TO_FIRE
+
 //// The following defines select which G codes tell the laser to fire.  It's OK to uncomment more than one.
 #define LASER_FIRE_G1 10 // fire the laser on a G1 move, extinguish when the move ends
 #define LASER_FIRE_SPINDLE 11 // fire the laser on M3, extinguish on M5
@@ -96,8 +99,8 @@
 
 //// Uncomment the following if the laser cutter is equipped with a peripheral relay board
 //// to control power to an exhaust fan, water pump, laser power supply, etc.
-#define LASER_PERIPHERALS
-#define LASER_PERIPHERALS_TIMEOUT 30000  // Number of milliseconds to wait for status signal from peripheral control board
+//#define LASER_PERIPHERALS
+//#define LASER_PERIPHERALS_TIMEOUT 30000  // Number of milliseconds to wait for status signal from peripheral control board
 
 //// Uncomment the following line to enable cubic bezier curve movement with the G5 code
 // #define G5_BEZIER
@@ -113,7 +116,7 @@
 #define CUSTOM_MENDEL_NAME "Laser Cutter"
 #define LASER_WATTS 40.0
 #define LASER_DIAMETER 0.1 // milimeters
-#define LASER_PWM 25000 // hertz
+#define LASER_PWM 50000 // hertz
 #define LASER_FOCAL_HEIGHT 74.50 // z axis position at which the laser is focused
 
 //===========================================================================
@@ -302,7 +305,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
 // Disable max endstops for compatibility with endstop checking routine
 #if defined(COREXY) && !defined(DISABLE_MAX_ENDSTOPS)
-  #define DISABLE_MAX_ENDSTOPS
+  #define DISABLE_MAX_ENDSTOPS // Moved from above ifdef
 #endif
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
@@ -346,20 +349,20 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 //#define Z_MIN_POS 0
 
 // Lansing Makers Netowrk Laser Cutter
-#define X_MAX_POS 531
-#define X_MIN_POS 0
-#define Y_MAX_POS 558
-#define Y_MIN_POS 0
-#define Z_MAX_POS 95
-#define Z_MIN_POS 0
+//#define X_MAX_POS 531
+//#define X_MIN_POS 0
+//#define Y_MAX_POS 558
+//#define Y_MIN_POS 0
+//#define Z_MAX_POS 95
+//#define Z_MIN_POS 0
 
 // China Town K40 CO2 Laser Engraver/Cutter
-//#define X_MAX_POS 337
-//#define X_MIN_POS 0
-//#define Y_MAX_POS 230
-//#define Y_MIN_POS 0
-//#define Z_MAX_POS 75
-//#define Z_MIN_POS 0
+#define X_MAX_POS 337
+#define X_MIN_POS 0
+#define Y_MAX_POS 230
+#define Y_MIN_POS 0
+#define Z_MAX_POS 75
+#define Z_MIN_POS 0
 
 #define X_MAX_LENGTH (X_MAX_POS - X_MIN_POS)
 #define Y_MAX_LENGTH (Y_MAX_POS - Y_MIN_POS)
@@ -378,7 +381,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
 //// MOVEMENT SETTINGS
 #define NUM_AXIS 4 // The axis order in all axis related arrays is X, Y, Z, E
-#define HOMING_FEEDRATE {3000, 3000, 240, 0}  // set the homing speeds (mm/min)
+#define HOMING_FEEDRATE {7600,7600,500,0} //{7600, 7600, 0, 0}  // set the homing speeds (mm/min)
 
 // default settings
 
@@ -391,7 +394,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
 // Lansing Makers Netowork Laser Cutter
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {157.4802,157.4802,6047.2440}  // default steps per unit for Ultimaker
-#define DEFAULT_MAX_FEEDRATE          {3000, 3000, 10, 25}    // (mm/sec)
+#define DEFAULT_MAX_FEEDRATE          {7600, 7600, 10, 25}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {2600,2600,2.5,2.5}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          2000    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
@@ -447,7 +450,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
 // The RepRapDiscount Smart Controller (white PCB)
 // http://reprap.org/wiki/RepRapDiscount_Smart_Controller
-//#define REPRAP_DISCOUNT_SMART_CONTROLLER
+// #define REPRAP_DISCOUNT_SMART_CONTROLLER
 
 // The GADGETS3D G3D LCD/SD Controller (blue PCB)
 // http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
@@ -457,7 +460,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 // http://reprap.org/wiki/RepRapDiscount_Full_Graphic_Smart_Controller
 //
 // ==> REMEMBER TO INSTALL U8glib to your ARDUINO library folder: http://code.google.com/p/u8glib/wiki/u8glib
-#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
+// #define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
 
 // The RepRapWorld REPRAPWORLD_KEYPAD v1.1
 // http://reprapworld.com/?products_details&products_id=202&cPath=1591_1626

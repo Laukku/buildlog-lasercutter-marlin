@@ -799,12 +799,6 @@ static void homeaxis(int axis) {
     has_axis_homed[axis] = true;
     current_position[axis] = 0;
     #ifdef MUVE_Z_PEEL
-
-      if (axis == Z_AXIS) {
-        has_axis_homed[E_AXIS] = true;
-        current_position[E_AXIS] = 0;
-      }
-
       plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[Z_AXIS]);
       destination[axis] = 1.5 * max_length(axis) * axis_home_dir;
       feedrate = homing_feedrate[axis];
@@ -881,6 +875,15 @@ void process_commands()
     case 0: // G0
       if(Stopped == false) {
         get_coordinates(); // For X Y Z E F
+		
+		#ifdef LASER_FIRE_G1
+		 laser.intensity = 0.0;
+         laser.duration = 0.0;
+         laser.ppm = 0.0;
+         laser.diagnostics = 0;
+         laser.status = LASER_OFF;
+		#endif // LASER_FIRE_G1
+		
         prepare_move();
         //ClearToSend();
         return;
@@ -1078,7 +1081,7 @@ void process_commands()
       if (code_seen('L')) laser.raster_raw_length = int(code_value());
 	  if (code_seen('$')) {
 		laser.raster_direction = (bool)code_value();
-		destination[Y_AXIS] = current_position[Y_AXIS] + (laser.raster_mm_per_pulse * laser.raster_aspect_ratio); // increment Y axis
+		destination[Y_AXIS] = current_position[Y_AXIS]; // + (laser.raster_mm_per_pulse * laser.raster_aspect_ratio); // increment Y axis
 	  }
       if (code_seen('D')) laser.raster_num_pixels = base64_decode(laser.raster_data, &cmdbuffer[bufindr][strchr_pointer - cmdbuffer[bufindr] + 1], laser.raster_raw_length);
 	  if (!laser.raster_direction) {
@@ -1137,7 +1140,6 @@ void process_commands()
       break;
       #endif //FWRETRACT
     case 28: //G28 Home all Axis one at a time
-      fanSpeed=255;
       saved_feedrate = feedrate;
       saved_feedmultiply = feedmultiply;
       feedmultiply = 100;
@@ -2890,7 +2892,7 @@ void prepare_move()
 	#ifdef MUVE_Z_PEEL
 	  plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[Z_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
 	#else
-      plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
+      mc_line(current_position[X_AXIS],current_position[Y_AXIS],destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
 	#endif // MUVE_Z_PEEL
   }
 #endif //else DELTA
@@ -2983,15 +2985,15 @@ void manage_inactivity()
         disable_e2();
         #ifdef LASER
           if (laser.time / 60000 > 0) {
-		laser.lifetime += laser.time / 60000; // convert to minutes
-		laser.time = 0;
-		Config_StoreSettings();
-	  }
-          laser_init();
-	#endif // LASER
-	#ifdef LASER_PERIPHERALS
+		    laser.lifetime += laser.time / 60000; // convert to minutes
+		    laser.time = 0;
+		    Config_StoreSettings();
+		  }
+		  laser_init();
+		#endif // LASER
+		#ifdef LASER_PERIPHERALS
             laser_peripherals_off();
-	#endif
+		#endif
       }
     }
   }
