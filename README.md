@@ -1,4 +1,16 @@
 ==========================================
+Neckbeard Marlin
+==========================================
+Modified firmware for compatibility with neckbeard-laser(  https://github.com/Laukku/laser-gcode-exporter-inkscape-plugin )
+
+## Changes
+1. Raster move doesn't move on the y-axis. A G0 command is required between lines (in Marlin_main.cpp).
+2. Shut down laser on G0 command automatically (in Marlin_main.cpp).
+3. Attempted to modulate laser intensity based on movement speed, but this turned out not to be important. The code remains but is not active. Should be removed, but can't be bothered since it works...
+
+Original information below:
+
+==========================================
 Turnkey K40 Laser Arduino + Ramps Firmware
 ==========================================
 An example of this firmware in action : https://www.youtube.com/watch?v=6DKSxDIkqoA
